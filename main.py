@@ -203,6 +203,7 @@ def log_event(message):
     # Clear existing tags
     log_text.tag_remove("gold", "1.0", tk.END)
     log_text.tag_remove("xp", "1.0", tk.END)
+    log_text.tag_remove("hp", "1.0", tk.END)
 
     # Insert message into the Text widget
     log_text.insert(tk.END, message + "\n")
@@ -217,6 +218,7 @@ def apply_colored_tags():
     """Find and apply colors to gold and XP in the log."""
     log_text.tag_config("gold", foreground="gold", font=("Arial", 10, "bold"))
     log_text.tag_config("xp", foreground="green", font=("Arial", 10, "bold"))
+    log_text.tag_config("hp", foreground="red", font=("Arial", 10, "bold"))
 
     text_content = log_text.get("1.0", tk.END)  # Get full text
 
@@ -233,6 +235,14 @@ def apply_colored_tags():
         start_idx = f"1.0 + {match.start(1)} chars"
         end_idx = f"1.0 + {match.end(2)} chars"
         log_text.tag_add("xp", start_idx, end_idx)
+
+    # Find "HP" and its preceding number
+    hp_matches = list(re.finditer(r"(\d+)\s+(HP)", text_content, re.IGNORECASE))
+    for match in hp_matches:
+        start_idx = f"1.0 + {match.start(1)} chars"
+        end_idx = f"1.0 + {match.end(2)} chars"
+        log_text.tag_add("hp", start_idx, end_idx)
+
 
 
 
