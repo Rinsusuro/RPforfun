@@ -154,22 +154,11 @@ def check_role_upgrade():
         if len(next_roles) == 1:
             player["role"] = next_roles[0]
             log_event(f"You have advanced to **{player['role']}**!")
+            update_status()
+            check_end_game()
         else:
-            # Prompt the user to choose among multiple roles.
-            choice = simpledialog.askstring(
-                "Choose Next Role",
-                f"You can advance to one of: {', '.join(next_roles)}.\n"
-                "Enter your choice exactly as shown, or cancel to stay."
-            )
-            if choice and choice in next_roles:
-                player["role"] = choice
-                log_event(f"You have advanced to **{player['role']}**!")
-            else:
-                log_event("No valid choice made. You remain in your current role.")
-
-        update_status()
-        check_end_game()
-
+            # Use button-based role selection
+            choose_role(next_roles)
 
 def check_end_game():
     """Check if the game should end (death or reached Emperor)."""
@@ -243,8 +232,34 @@ def apply_colored_tags():
         end_idx = f"1.0 + {match.end(2)} chars"
         log_text.tag_add("hp", start_idx, end_idx)
 
+def choose_role(next_roles):
+    """Creates a popup window with buttons for role selection."""
+    if not next_roles:
+        return
 
+    def set_role(role):
+        """Update player's role and close the popup."""
+        player["role"] = role
+        log_event(f"You have advanced to **{player['role']}**!")
+        update_status()
+        check_end_game()
+        role_window.destroy()
 
+    # Create a new top-level window for role selection
+    role_window = tk.Toplevel(root)
+    role_window.title("Choose Your Next Role")
+    role_window.geometry("300x150")
+
+    tk.Label(role_window, text="Choose Your Next Role:", font=("Arial", 12, "bold")).pack(pady=10)
+
+    # Create buttons for each available role
+    for role in next_roles:
+        btn = tk.Button(role_window, text=role, font=("Arial", 10), command=lambda r=role: set_role(r))
+        btn.pack(pady=5)
+
+    # Run the window until a selection is made
+    role_window.grab_set()
+    role_window.wait_window()
 
 def disable_actions():
     """Disable all action buttons (end of game)."""
