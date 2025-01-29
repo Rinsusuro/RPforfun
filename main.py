@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+import re
 import random
 
 # --------------------------------
@@ -196,11 +197,43 @@ def update_status():
 
 
 def log_event(message):
-    """Append a message to the log Text widget."""
+    """Append a message to the log Text widget with color formatting for gold and XP."""
     log_text.config(state=tk.NORMAL)
+
+    # Clear existing tags
+    log_text.tag_remove("gold", "1.0", tk.END)
+    log_text.tag_remove("xp", "1.0", tk.END)
+
+    # Insert message into the Text widget
     log_text.insert(tk.END, message + "\n")
+
+    # Apply formatting for "gold" (yellow) and "XP" (green)
+    apply_colored_tags()
+
     log_text.see(tk.END)
     log_text.config(state=tk.DISABLED)
+
+def apply_colored_tags():
+    """Find and apply colors to gold and XP in the log."""
+    log_text.tag_config("gold", foreground="gold", font=("Arial", 10, "bold"))
+    log_text.tag_config("xp", foreground="green", font=("Arial", 10, "bold"))
+
+    text_content = log_text.get("1.0", tk.END)  # Get full text
+
+    # Find "gold" and its preceding number
+    gold_matches = list(re.finditer(r"(\d+)\s+(gold)", text_content, re.IGNORECASE))
+    for match in gold_matches:
+        start_idx = f"1.0 + {match.start(1)} chars"
+        end_idx = f"1.0 + {match.end(2)} chars"
+        log_text.tag_add("gold", start_idx, end_idx)
+
+    # Find "XP" and its preceding number
+    xp_matches = list(re.finditer(r"(\d+)\s+(XP)", text_content, re.IGNORECASE))
+    for match in xp_matches:
+        start_idx = f"1.0 + {match.start(1)} chars"
+        end_idx = f"1.0 + {match.end(2)} chars"
+        log_text.tag_add("xp", start_idx, end_idx)
+
 
 
 def disable_actions():
